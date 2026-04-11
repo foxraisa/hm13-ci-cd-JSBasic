@@ -17,9 +17,9 @@ module.exports = {
   overrides: [
     {
       // Применяется только к файлам тестов
-      files: ['**/*.test.js', '**/*.spec.js', '**/__tests__/**/*.js'],
+      files: ['tests/**/*.js'], // Только файлы внутри папки tests/
       env: {
-        jest: true // Подключает словарь Jest-глобалов только здесь
+        jest: true // Подключает globals: test, expect, beforeEach, describe и др.
       }
     }
   ]
