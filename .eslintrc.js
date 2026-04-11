@@ -2,8 +2,7 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
-    node: true,
-    jest: true // ✅ Включаем окружение Jest
+    node: true
   },
   extends: ['eslint:recommended'],
   parserOptions: {
@@ -14,5 +13,14 @@ module.exports = {
     'no-unused-vars': 'warn',
     'semi': ['error', 'always'],
     'quotes': ['error', 'single']
-  }
+  },
+  overrides: [
+    {
+      // Применяется только к файлам тестов
+      files: ['**/*.test.js', '**/*.spec.js', '**/__tests__/**/*.js'],
+      env: {
+        jest: true // Подключает словарь Jest-глобалов только здесь
+      }
+    }
+  ]
 };
