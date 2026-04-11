@@ -2,14 +2,13 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
-    node: true
+    node: true,
+    jest: true // ✅ Включаем окружение Jest
   },
-  extends: [
-    'eslint:recommended'
-  ],
+  extends: ['eslint:recommended'],
   parserOptions: {
     ecmaVersion: 2022,
-    sourceType: 'module' // Разрешает import/export в твоих исходных файлах
+    sourceType: 'module'
   },
   rules: {
     'no-unused-vars': 'warn',
