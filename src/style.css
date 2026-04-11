@@ -44,6 +44,7 @@ h1 {
     border: 2px solid #ddd;
     border-radius: 5px;
     font-size: 16px;
+    transition: border-color 0.2s ease;
 }
 
 #textInput:focus {
@@ -60,6 +61,7 @@ h1 {
     border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
+    transition: background 0.2s ease, cursor 0.2s ease;
 }
 
 #addButton:hover:not(:disabled) {
@@ -79,6 +81,14 @@ h1 {
     border-radius: 5px;
     margin-bottom: 15px;
     border-left: 4px solid #c62828;
+    /* ✅ Скрыто по умолчанию, управление через класс состояния */
+    display: none;
+}
+
+/* ✅ Состояние: ошибка видима */
+.error--visible {
+    display: block;
+    animation: fadeIn 0.3s ease;
 }
 
 /* Контейнер для параграфов */
@@ -100,17 +110,34 @@ h1 {
     border-left: 4px solid #2196F3;
 }
 
+/* ✅ Анимация появления параграфа */
+.paragraph--enter {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* ✅ Анимация исчезновения параграфа */
+.paragraph--exit {
+    animation: fadeOut 0.5s ease forwards;
+}
+
 /* Счетчик */
 .counter {
     text-align: center;
     padding: 15px;
     background: #f5f5f5;
     border-radius: 5px;
+    /* ✅ Плавная смена цвета при переключении класса */
+    transition: color 0.3s ease;
 }
 
 .counter span {
     font-weight: bold;
     font-size: 1.2em;
+}
+
+/* ✅ Состояние: предупреждение лимита */
+.counter--warning {
+    color: #d32f2f;
 }
 
 .limit-info {

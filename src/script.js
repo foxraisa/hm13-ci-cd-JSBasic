@@ -1,90 +1,99 @@
-// Подключаем стили
-import './style.css';
+// script.js
+// ✅ Конфигурация — все настройки в одном месте
+const CONFIG = {
+  MAX_PARAGRAPHS: 5,
+  MAX_TEXT_LENGTH: 500,
+  ERROR_TIMEOUT: 3000,
+  COUNTER_WARNING_THRESHOLD: 4,
+  SELECTORS: {
+    INPUT: '#textInput',
+    BUTTON: '#addButton',
+    CONTAINER: '#paragraphsContainer',
+    COUNTER: '#counter',
+    ERROR: '#errorMessage'
+  },
+  CLASSES: {
+    ERROR_VISIBLE: 'error--visible',
+    COUNTER_WARNING: 'counter--warning',
+    PARAGRAPH_ENTER: 'paragraph--enter',
+    PARAGRAPH_EXIT: 'paragraph--exit'
+  }
+};
 
-// Все переменные храним в одном месте
-let maxParagraphs = 5;
-
-// Выносим основные функции в глобальную область для тестирования
+// ✅ Глобальный объект для тестирования (намеренное решение для учебного проекта)
 window.paragraphApp = {
-  maxParagraphs: maxParagraphs,
-  
-  // Функция для обновления кнопки
-  updateButton: function(textInput, addButton) {
-    if (textInput.value.trim() === '') {
-      addButton.disabled = true;
-    } else {
-      addButton.disabled = false;
-    }
+  // Валидация и обновление состояния кнопки
+  updateButton(textInput, addButton) {
+    addButton.disabled = !textInput.value.trim();
   },
-  
-  // Функция для показа ошибки
-  showError: function(errorMessage, message) {
+
+  // Показать ошибку с авто-скрытием
+  showError(errorMessage, message) {
     errorMessage.textContent = message;
-    errorMessage.style.display = 'block';
+    errorMessage.classList.add(CONFIG.CLASSES.ERROR_VISIBLE);
     
-    setTimeout(function() {
-      errorMessage.style.display = 'none';
-    }, 3000);
+    // Используем setTimeout только для UI-тайминга, не для логики
+    setTimeout(() => {
+      errorMessage.classList.remove(CONFIG.CLASSES.ERROR_VISIBLE);
+    }, CONFIG.ERROR_TIMEOUT);
   },
-  
-  // Функция для обновления счетчика
-  updateCounter: function(paragraphsContainer, counterElement) {
-    const paragraphs = paragraphsContainer.getElementsByTagName('p');
-    const count = paragraphs.length;
+
+  // Обновление счётчика с визуальной индикацией
+  updateCounter(paragraphsContainer, counterElement) {
+    // ✅ Статическая коллекция — безопасно для асинхронных операций
+    const count = paragraphsContainer.querySelectorAll('p[data-testid="paragraph"]').length;
     counterElement.textContent = count;
     
-    if (count >= 4) {
-      counterElement.style.color = 'red';
-    } else {
-      counterElement.style.color = 'black';
-    }
+    // Переключаем класс вместо прямого изменения стиля
+    counterElement.classList.toggle(
+      CONFIG.CLASSES.COUNTER_WARNING,
+      count >= CONFIG.COUNTER_WARNING_THRESHOLD
+    );
     
     return count;
   },
-  
-  // Функция для добавления нового параграфа
-  addParagraph: function(textInput, addButton, paragraphsContainer, counterElement, errorMessage) {
+
+  // Добавление параграфа с валидацией и лимитом
+  addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage) {
     const text = textInput.value.trim();
-    
-    // Проверяем что текст не пустой
-    if (text === '') {
+
+    if (!text) {
       this.showError(errorMessage, 'Пожалуйста, введите текст');
       return false;
     }
-    
-    // Проверяем что текст не слишком длинный
-    if (text.length > 500) {
-      this.showError(errorMessage, 'Текст слишком длинный. Максимум 500 символов');
+
+    if (text.length > CONFIG.MAX_TEXT_LENGTH) {
+      this.showError(errorMessage, `Максимум ${CONFIG.MAX_TEXT_LENGTH} символов`);
       return false;
     }
-    
-    // Создаем новый элемент параграфа
+
+    // Создаём параграф с данными для тестов и анимацией
     const newParagraph = document.createElement('p');
     newParagraph.textContent = text;
-    newParagraph.style.animation = 'fadeIn 0.5s ease';
+    newParagraph.setAttribute('data-testid', 'paragraph'); // ✅ для устойчивых тестов
+    newParagraph.classList.add(CONFIG.CLASSES.PARAGRAPH_ENTER);
     
-    // Добавляем параграф в контейнер
     paragraphsContainer.appendChild(newParagraph);
-    
-    // Проверяем количество параграфов
-    const paragraphs = paragraphsContainer.getElementsByTagName('p');
-    
-    // Если параграфов больше максимума - удаляем первый
-    if (paragraphs.length > this.maxParagraphs) {
-      paragraphs[0].style.animation = 'fadeOut 0.5s ease';
+
+    // ✅ Используем статический срез коллекции
+    const paragraphs = Array.from(
+      paragraphsContainer.querySelectorAll('p[data-testid="paragraph"]')
+    );
+
+    // Удаляем старый параграф при превышении лимита
+    if (paragraphs.length > CONFIG.MAX_PARAGRAPHS) {
+      const first = paragraphs[0];
+      first.classList.add(CONFIG.CLASSES.PARAGRAPH_EXIT);
       
-      setTimeout(function() {
-        if (paragraphs[0]) {
-          paragraphsContainer.removeChild(paragraphs[0]);
-          window.paragraphApp.updateCounter(paragraphsContainer, counterElement);
-        }
-      }, 500);
+      // ✅ Ждём завершения анимации, а не полагаемся на таймер
+      first.addEventListener('animationend', () => {
+        first.remove();
+        this.updateCounter(paragraphsContainer, counterElement);
+      }, { once: true }); // {once: true} — авто-удаление слушателя
     }
-    
-    // Очищаем поле ввода
+
+    // Сброс формы и обновление UI
     textInput.value = '';
-    
-    // Обновляем кнопку и счетчик
     this.updateButton(textInput, addButton);
     this.updateCounter(paragraphsContainer, counterElement);
     
@@ -92,46 +101,56 @@ window.paragraphApp = {
   }
 };
 
-// Ждем когда вся страница загрузится
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Страница загружена!');
+// ✅ Инициализация после загрузки DOM
+document.addEventListener('DOMContentLoaded', () => {
+  // Получаем элементы через конфиг — легче мокать в тестах
+  const elements = {
+    textInput: document.querySelector(CONFIG.SELECTORS.INPUT),
+    addButton: document.querySelector(CONFIG.SELECTORS.BUTTON),
+    paragraphsContainer: document.querySelector(CONFIG.SELECTORS.CONTAINER),
+    counterElement: document.querySelector(CONFIG.SELECTORS.COUNTER),
+    errorMessage: document.querySelector(CONFIG.SELECTORS.ERROR)
+  };
+
+  // Ранний выход при отсутствии критичных элементов
+  const required = ['textInput', 'addButton', 'paragraphsContainer', 'counterElement'];
+  const missing = required.filter(key => !elements[key]);
   
-  // Находим все нужные элементы на странице
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
-  const errorMessage = document.getElementById('errorMessage');
-  
-  // Проверяем что все элементы найдены
-  if (!textInput || !addButton || !paragraphsContainer || !counterElement) {
-    console.error('Не найдены нужные элементы на странице!');
+  if (missing.length) {
+    console.error('❌ Не найдены элементы:', missing.join(', '));
     return;
   }
-  
-  // Функция для обработки нажатия Enter
-  function handleKeyPress(event) {
-    if (event.key === 'Enter' && !addButton.disabled) {
-      window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
+
+  // Обработчики событий
+  elements.textInput.addEventListener('input', () => {
+    window.paragraphApp.updateButton(elements.textInput, elements.addButton);
+  });
+
+  elements.textInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !elements.addButton.disabled) {
+      window.paragraphApp.addParagraph(
+        elements.textInput,
+        elements.addButton,
+        elements.paragraphsContainer,
+        elements.counterElement,
+        elements.errorMessage
+      );
     }
-  }
-  
-  // Назначаем обработчики событий
-  textInput.addEventListener('input', function() {
-    window.paragraphApp.updateButton(textInput, addButton);
   });
-  
-  textInput.addEventListener('keypress', handleKeyPress);
-  
-  addButton.addEventListener('click', function() {
-    window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
+
+  elements.addButton.addEventListener('click', () => {
+    window.paragraphApp.addParagraph(
+      elements.textInput,
+      elements.addButton,
+      elements.paragraphsContainer,
+      elements.counterElement,
+      elements.errorMessage
+    );
   });
+
+  // Фокус и начальная инициализация
+  elements.textInput.focus();
+  window.paragraphApp.updateCounter(elements.paragraphsContainer, elements.counterElement);
   
-  // Фокусируемся на поле ввода для удобства
-  textInput.focus();
-  
-  // Обновляем счетчик при загрузке
-  window.paragraphApp.updateCounter(paragraphsContainer, counterElement);
-  
-  console.log('Приложение готово к работе!');
+  console.log('✅ ParagraphApp initialised');
 });

@@ -1,152 +1,136 @@
-/**
- * Простые тесты для приложения параграфов
- */
+// tests/app.test.js
+import '../src/script.js';
 
-// Перед каждым тестом создаем чистую страницу
+// ✅ Включаем фейковые таймеры для контроля setTimeout
+beforeAll(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.clearAllTimers();
+  document.body.innerHTML = '';
+});
+
 beforeEach(() => {
-  // Создаем HTML структуру как в реальной странице
   document.body.innerHTML = `
     <div class="container">
-      <input type="text" id="textInput" placeholder="Введите текст...">
-      <button id="addButton" disabled>Добавить параграф</button>
-      <div id="errorMessage" class="error-message" style="display: none;"></div>
-      <div class="paragraphs-container" id="paragraphsContainer">
-        <p>Первый параграф</p>
-        <p>Второй параграф</p>
+      <input type="text" id="textInput" data-testid="input" placeholder="Введите текст...">
+      <button id="addButton" data-testid="button" disabled>Добавить параграф</button>
+      <div id="errorMessage" data-testid="error" class="error-message"></div>
+      <div class="paragraphs-container" id="paragraphsContainer" data-testid="container">
+        <p data-testid="paragraph">Первый параграф</p>
+        <p data-testid="paragraph">Второй параграф</p>
       </div>
       <div class="counter">
-        Параграфов: <span id="counter">2</span>
+        Параграфов: <span id="counter" data-testid="counter">2</span>
         <div class="limit-info">(максимум 5)</div>
       </div>
     </div>
   `;
 });
 
-// Тест 1: Проверяем обновление кнопки
-test('кнопка должна быть активна когда есть текст', () => {
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
+test('кнопка активна при вводе текста', () => {
+  const textInput = document.querySelector('[data-testid="input"]');
+  const addButton = document.querySelector('[data-testid="button"]');
   
-  // Проверяем что кнопка изначально неактивна
   expect(addButton.disabled).toBe(true);
   
-  // Вводим текст
   textInput.value = 'Новый текст';
-  
-  // Обновляем состояние кнопки
   window.paragraphApp.updateButton(textInput, addButton);
   
-  // Теперь кнопка должна быть активна
   expect(addButton.disabled).toBe(false);
 });
 
-// Тест 2: Проверяем добавление параграфа
-test('добавляет новый параграф при правильном вводе', () => {
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
-  const errorMessage = document.getElementById('errorMessage');
+test('добавляет параграф при валидном вводе', () => {
+  const textInput = document.querySelector('[data-testid="input"]');
+  const addButton = document.querySelector('[data-testid="button"]');
+  const container = document.querySelector('[data-testid="container"]');
+  const counter = document.querySelector('[data-testid="counter"]');
+  const error = document.querySelector('[data-testid="error"]');
   
-  // Запоминаем начальное количество параграфов
-  const initialCount = paragraphsContainer.children.length;
+  const initialCount = container.querySelectorAll('[data-testid="paragraph"]').length;
   
-  // Вводим текст и добавляем параграф
   textInput.value = 'Тестовый параграф';
-  const result = window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
+  const result = window.paragraphApp.addParagraph(textInput, addButton, container, counter, error);
   
-  // Проверяем что параграф добавился успешно
   expect(result).toBe(true);
-  expect(paragraphsContainer.children.length).toBe(initialCount + 1);
-  expect(paragraphsContainer.lastChild.textContent).toBe('Тестовый параграф');
+  expect(container.querySelectorAll('[data-testid="paragraph"]')).toHaveLength(initialCount + 1);
+  expect(container.lastElementChild.textContent).toBe('Тестовый параграф');
 });
 
-// Тест 3: Проверяем обработку пустого ввода
 test('показывает ошибку при пустом вводе', () => {
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
-  const errorMessage = document.getElementById('errorMessage');
+  const textInput = document.querySelector('[data-testid="input"]');
+  const addButton = document.querySelector('[data-testid="button"]');
+  const container = document.querySelector('[data-testid="container"]');
+  const counter = document.querySelector('[data-testid="counter"]');
+  const error = document.querySelector('[data-testid="error"]');
   
-  // Пытаемся добавить пустой текст
-  textInput.value = '   '; // Только пробелы
-  const result = window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
+  textInput.value = '   ';
+  const result = window.paragraphApp.addParagraph(textInput, addButton, container, counter, error);
   
-  // Проверяем что параграф не добавился и показана ошибка
   expect(result).toBe(false);
-  expect(errorMessage.style.display).toBe('block');
-  expect(errorMessage.textContent).toBe('Пожалуйста, введите текст');
+  // ✅ Проверка через класс, а не инлайн-стиль
+  expect(error.classList.contains('error--visible')).toBe(true);
+  expect(error.textContent).toBe('Пожалуйста, введите текст');
 });
 
-// Тест 4: Проверяем обновление счетчика
-test('счетчик обновляется при добавлении параграфа', () => {
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
+test('счетчик обновляется корректно', () => {
+  const container = document.querySelector('[data-testid="container"]');
+  const counter = document.querySelector('[data-testid="counter"]');
   
-  // Проверяем начальное значение
-  expect(counterElement.textContent).toBe('2');
+  expect(counter.textContent).toBe('2');
   
-  // Обновляем счетчик
-  const count = window.paragraphApp.updateCounter(paragraphsContainer, counterElement);
+  const count = window.paragraphApp.updateCounter(container, counter);
   
-  // Проверяем что счетчик показывает правильное количество
   expect(count).toBe(2);
-  expect(counterElement.textContent).toBe('2');
+  expect(counter.textContent).toBe('2');
 });
 
-// Тест 5: Проверяем ограничение на максимальное количество параграфов
-test('не позволяет иметь больше 5 параграфов', () => {
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
-  const errorMessage = document.getElementById('errorMessage');
+test('не превышает лимит параграфов', () => {
+  const textInput = document.querySelector('[data-testid="input"]');
+  const addButton = document.querySelector('[data-testid="button"]');
+  const container = document.querySelector('[data-testid="container"]');
+  const counter = document.querySelector('[data-testid="counter"]');
+  const error = document.querySelector('[data-testid="error"]');
   
-  // Добавляем параграфы до превышения лимита
+  // Добавляем больше, чем лимит
   for (let i = 0; i < 10; i++) {
     textInput.value = `Параграф ${i + 3}`;
-    window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
+    window.paragraphApp.addParagraph(textInput, addButton, container, counter, error);
   }
   
-  // Проверяем что параграфов не больше максимума
-  expect(paragraphsContainer.children.length).toBeLessThanOrEqual(window.paragraphApp.maxParagraphs);
+  // ✅ Проматываем таймеры для завершения анимаций
+  jest.runAllTimers();
+  
+  expect(container.querySelectorAll('[data-testid="paragraph"]')).toHaveLength(
+    window.paragraphApp.maxParagraphs
+  );
 });
 
-// Тест 6: Проверяем обработку длинного текста
-test('показывает ошибку при слишком длинном тексте', () => {
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
-  const errorMessage = document.getElementById('errorMessage');
+test('отклоняет текст длиннее 500 символов', () => {
+  const textInput = document.querySelector('[data-testid="input"]');
+  const addButton = document.querySelector('[data-testid="button"]');
+  const container = document.querySelector('[data-testid="container"]');
+  const counter = document.querySelector('[data-testid="counter"]');
+  const error = document.querySelector('[data-testid="error"]');
   
-  // Создаем слишком длинный текст
-  const longText = 'A'.repeat(600);
-  textInput.value = longText;
+  textInput.value = 'A'.repeat(600);
+  const result = window.paragraphApp.addParagraph(textInput, addButton, container, counter, error);
   
-  const result = window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
-  
-  // Проверяем что параграф не добавился и показана ошибка
   expect(result).toBe(false);
-  expect(errorMessage.style.display).toBe('block');
-  expect(errorMessage.textContent).toContain('слишком длинный');
+  expect(error.classList.contains('error--visible')).toBe(true);
+  expect(error.textContent).toContain('слишком длинный');
 });
 
-// Тест 7: Проверяем очистку поля ввода
-test('очищает поле ввода после добавления параграфа', () => {
-  const textInput = document.getElementById('textInput');
-  const addButton = document.getElementById('addButton');
-  const paragraphsContainer = document.getElementById('paragraphsContainer');
-  const counterElement = document.getElementById('counter');
-  const errorMessage = document.getElementById('errorMessage');
+test('очищает поле ввода после добавления', () => {
+  const textInput = document.querySelector('[data-testid="input"]');
+  const addButton = document.querySelector('[data-testid="button"]');
+  const container = document.querySelector('[data-testid="container"]');
+  const counter = document.querySelector('[data-testid="counter"]');
+  const error = document.querySelector('[data-testid="error"]');
   
-  // Вводим текст и добавляем параграф
   textInput.value = 'Текст для проверки';
-  window.paragraphApp.addParagraph(textInput, addButton, paragraphsContainer, counterElement, errorMessage);
+  window.paragraphApp.addParagraph(textInput, addButton, container, counter, error);
   
-  // Проверяем что поле ввода очистилось
   expect(textInput.value).toBe('');
 });
-
-console.log('Все тесты загружены! Запустите: npm test');
