@@ -1,4 +1,3 @@
-// script.js
 // ✅ Конфигурация — все настройки в одном месте
 const CONFIG = {
   MAX_PARAGRAPHS: 5,

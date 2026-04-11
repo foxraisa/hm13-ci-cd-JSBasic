@@ -18,6 +18,9 @@
     "*.js": "eslint --fix"
   },
   "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
+    "babel-jest": "^30.3.0",
     "css-loader": "^6.8.1",
     "eslint": "^8.57.0",
     "html-webpack-plugin": "^5.5.3",
