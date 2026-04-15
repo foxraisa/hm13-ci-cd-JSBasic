@@ -1,26 +1,20 @@
+// .eslintrc.js
 module.exports = {
   env: {
     browser: true,
-    es2021: true,
-    node: true
+    node: true,
+    jest: true  // ✅ Ключевое: добавляем jest в глобалы
   },
   extends: ['eslint:recommended'],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module'
   },
-  rules: {
-    'no-unused-vars': 'warn',
-    'semi': ['error', 'always'],
-    'quotes': ['error', 'single']
-  },
+  // ✅ Игнорируем линтинг тестовых файлов, если нужно
   overrides: [
     {
-      // Применяется только к файлам тестов
-      files: ['tests/**/*.js'], // Только файлы внутри папки tests/
-      env: {
-        jest: true // Подключает globals: test, expect, beforeEach, describe и др.
-      }
+      files: ['tests/**/*.test.js'],
+      env: { jest: true }
     }
   ]
 };

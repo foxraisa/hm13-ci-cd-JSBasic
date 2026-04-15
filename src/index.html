@@ -14,13 +14,13 @@
             <button id="addButton" disabled>Добавить параграф</button>
         </div>
        
-        <!-- Блок для сообщений об ошибках -->
         <div id="errorMessage" class="error-message" style="display: none;"></div>
        
         <div class="paragraphs-container" id="paragraphsContainer">
-            <p>Первый параграф страницы</p>
-            <p>Второй параграф с примером текста</p>
-            <p>Третий параграф для демонстрации</p>
+            <!-- ✅ data-testid для консистентности с тестами -->
+            <p data-testid="paragraph">Первый параграф страницы</p>
+            <p data-testid="paragraph">Второй параграф с примером текста</p>
+            <p data-testid="paragraph">Третий параграф для демонстрации</p>
         </div>
        
         <div class="counter">
@@ -28,7 +28,5 @@
             <div class="limit-info">(максимум 5)</div>
         </div>
     </div>
-
-    <!-- Webpack сам добавит script.js -->
 </body>
 </html>
