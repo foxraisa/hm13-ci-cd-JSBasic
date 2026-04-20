@@ -1,0 +1,185 @@
+/* Базовые стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Основной контейнер */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Заголовок */
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+/* Группа ввода */
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+/* Поле ввода */
+#textInput {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    transition: border-color 0.2s ease;
+}
+
+#textInput:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+/* Кнопка */
+#addButton {
+    padding: 12px 24px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.2s ease, cursor 0.2s ease;
+}
+
+#addButton:hover:not(:disabled) {
+    background: #45a049;
+}
+
+#addButton:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+/* Сообщение об ошибке */
+.error-message {
+    background: #ffebee;
+    color: #c62828;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #c62828;
+    /* ✅ Скрыто по умолчанию, управление через класс состояния */
+    display: none;
+}
+
+/* ✅ Состояние: ошибка видима */
+.error--visible {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Контейнер для параграфов */
+.paragraphs-container {
+    border: 2px dashed #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    background: #f9f9f9;
+    min-height: 200px;
+    margin-bottom: 20px;
+}
+
+/* Стили параграфов */
+.paragraphs-container p {
+    background: #e3f2fd;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border-left: 4px solid #2196F3;
+}
+
+/* ✅ Анимация появления параграфа */
+.paragraph--enter {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* ✅ Анимация исчезновения параграфа */
+.paragraph--exit {
+    animation: fadeOut 0.5s ease forwards;
+}
+
+/* Счетчик */
+.counter {
+    text-align: center;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 5px;
+    /* ✅ Плавная смена цвета при переключении класса */
+    transition: color 0.3s ease;
+}
+
+.counter span {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* ✅ Состояние: предупреждение лимита */
+.counter--warning {
+    color: #d32f2f;
+}
+
+.limit-info {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 600px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .input-group {
+        flex-direction: column;
+    }
+    
+    #addButton {
+        width: 100%;
+    }
+}
